@@ -1,0 +1,22 @@
+
+server:
+  port: 9001
+  
+spring:
+  application:
+    name: BootSecurity
+
+#security:
+#  basic:
+#    enabled: true #默认开启   false表示关闭权限校验 
+#  user:
+#    name: admin
+#    password: admin
+#  sessions: stateless # 不创建和使用 session
+#  ignored:
+#  - user/login
+#  - user/register
+
+token: 
+  secret: secret
+  expiration: 10800
