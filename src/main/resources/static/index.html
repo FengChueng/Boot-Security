@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="/css/bootstrap.css" rel="stylesheet" type="text/css">
+<link href="/css/signin.css" rel="stylesheet" type="text/css">
+<title>Index</title>
+
+</head>
+
+<body>
+
+	<a>hello:</a>
+	<span id="username"> </span>
+	
+	<button id="token" onclick="showToken()">token</button>
+
+
+	<script src="/js/jquery-3.3.1.js"></script>
+	<script src="/js/bootstrap.js"></script>
+
+	<script type="text/javascript">
+
+	function showToken(){
+	    var storage = window.localStorage;
+	    var token = storage.user_token;//token的值
+	    $("#token").html(token);
+	}
+	
+	$(function () {
+    $.ajax({
+        url : "user/info/"+getToken(),//后台请求的数据，用的是PHP
+        dataType : "json",//数据格式 
+        type : "get",//请求方式
+        async : false,//是否异步请求
+        success : function(data) {   //如果请求成功，返回数据。
+        //var html = "";
+        $("#username").html(data); //在html页面id=test的标签里显示html内容
+        },
+    })
+})
+
+function getToken()
+{
+    var storage = window.localStorage;
+    var token = storage.user_token;//token的值
+    var old_time = storage.user_login_time;//登录的时间
+    var time = (current - old_time) /1000;//时间差
+    var out_time = 3600;// 超时设置
+    var parse_time = 24 * 60 * 60;// 刷新设置
+
+	 //手动清除缓存
+	 var length = window.localStorage.length;
+	 if(length==0){ 
+	window.location.href = "login.html"
+	    //超时
+	 if(parse_time > time && time >= out_time) {
+	     refreshToken(token);
+	 }
+	 //1天过期 重新登录
+	 if(time >= parse_time) {
+	     window.location.href = "login.html";
+	 }
+	return token;
+}
+
+	//刷新token
+
+	 function refreshToken(token)
+	 {
+	       if(window.localStorage.length==0){
+	            window.localStorage.clear();
+	            window.location.href = "login.html";
+	       }
+	     $.ajaxSetup({
+	         'headers': {
+	             'Authorization': 'Bearer ' + token,
+	         }
+	     });
+	     $.ajax({
+	         url:"/user",
+	         type:'post',
+	         dataType: "json",
+	         data: {},
+	         success: function(data) {
+	             setToken(data);
+	         },
+	         error: function (data) {
+	             console.log("数据请求失败");
+	             window.location.href='login.html';
+	         }
+	     });
+	 }
+
+	 function setToken(data){
+		    var storage = window.localStorage;
+		    if(!storage){
+		        alert("浏览器不支持localstorage");
+		        return false;
+		    }
+		    storage.setItem("token", data);
+		}
+	 
+
+function getCookie(cookie_name)
+{
+    var allcookies = document.cookie;
+    var cookie_pos = allcookies.indexOf(cookie_name);   //索引的长度
+  
+    // 如果找到了索引，就代表cookie存在，
+    // 反之，就说明不存在。
+    if (cookie_pos != -1)
+    {
+        // 把cookie_pos放在值的开始，只要给值加1即可。
+        cookie_pos += cookie_name.length + 1;      //这里容易出问题，所以请大家参考的时候自己好好研究一下
+        var cookie_end = allcookies.indexOf(";", cookie_pos);
+  
+        if (cookie_end == -1)
+        {
+            cookie_end = allcookies.length;
+        }
+  
+        var value = unescape(allcookies.substring(cookie_pos, cookie_end));         //这里就可以得到你想要的cookie的值了。。。
+    }
+    return value;
+}
+ 
+function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) endstr = document.cookie.length;
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+</script>
+
+</body>
+</html>
+

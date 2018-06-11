@@ -1,4 +1,4 @@
-package com.zyl.sercurity;
+package com.zyl.sercurity.utils;
 public class TokenDetailImpl implements TokenDetail {
 
     private final String username;

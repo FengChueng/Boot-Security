@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html >
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/css/signin.css" rel="stylesheet" type="text/css">
+    <title>Index</title>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <form class="form-signin" id="loginForm">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input  type="text" id="username" name="username" class="form-control" placeholder="Email address" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+        <!-- <div class="checkbox">
+            <label><input type="checkbox" value="remember-me"> Remember me</label>
+        </div> -->
+        <input class="btn btn-lg btn-primary btn-block" type="button" onclick="ajaxForm();">Sign in</button>
+    </form>
+    <!-- <button class="btn btn-lg btn-primary btn-block" type="button" onclick="ajaxForm()">Sign in</button> -->
+
+</div>
+
+<script src="/js/jquery-3.3.1.js"></script>
+<script src="/js/bootstrap.js"></script>
+
+<script>
+
+
+
+
+/* $(document).ready(function(){
+  $("button").click(function(){
+    $.post("/user/login",
+    {
+      name:"admin",
+      password:"admin"
+    }.,
+    function(data,status){
+      alert("数据：" + data + "\n状态：" + status);
+    });
+  });
+}); */
+
+
+function ajaxForm(){
+ 	var formData = JSON.stringify({
+ 		username:"admin",
+	      password:"123456"
+	    });
+	var storage = window.localStorage;
+	$.ajax({
+		type:"POST",
+		async:false,
+		data:$('#loginForm').serialize(),
+		/* data:formData, */
+		headers: {
+			"content-Type":"application/json",
+			 },
+		dataType : 'text',
+		/* url:"${pageContext.request.contextPath}/user/login" */
+		/* url:"http://127.0.0.1:9003/user/login?backUrl="+getUrlParam("backUrl"), */
+		url:"/user/token",
+		success:function(data){
+			/* alert(); */
+			console.log("成功");
+			setToken(data);
+			alert(data);
+			//跳转至主页
+			window.location.href = "index.html";
+		},
+		error:function(data){
+			alert(data);
+		}
+		
+	});
+}
+
+function setToken(data){
+    var storage = window.localStorage;
+    if(!storage){
+        alert("浏览器不支持localstorage");
+        return false;
+    }
+    storage.setItem("token", data);
+}
+
+function getUrlParam(name) {  
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); // 构造一个含有目标参数的正则表达式对象  
+    var r = window.location.search.substr(1).match(reg);  // 匹配目标参数  
+    if (r != null) return unescape(r[2]); return "index"; // 返回参数值  
+}  
+
+</script>
+</body>
+</html>
+
