@@ -1,93 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link th:href="@{/css/bootstrap.css}" rel="stylesheet" type="text/css">
-    <link th:href="@{/css/signin.css}" rel="stylesheet" type="text/css">
-    <title>Index</title>
-
+    <meta charset="UTF-8"/>
+    <title>Title</title>
 </head>
-
 <body>
+login
 
-<div class="container">
+<form th:action="@{user/token}" method="post">
 
-    <form th:action="@{/user/token}" method="post" class="form-signin" id="loginForm">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input  type="text" id="name" name="username" class="form-control" placeholder="Email address" required autofocus>
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-        <!-- <div class="checkbox">
-            <label><input type="checkbox" value="remember-me"> Remember me</label>
-        </div> -->
-        <!-- <button class="btn btn-lg btn-primary btn-block" type="submit" onclick="ajaxForm()">Sign in</button> -->
-        <input class="btn btn-lg btn-primary btn-block" type="submit" value="登录">
-    </form>
-    <!-- <button class="btn btn-lg btn-primary btn-block" type="button" onclick="ajaxForm()">Sign in</button> -->
-
-</div>
-
-<script th:src="@{/js/jquery-3.3.1.js}"></script>
-<script th:src="@{/js/bootstrap.js}"></script>
-
-<script>
-
-
-
-
-/* $(document).ready(function(){
-  $("button").click(function(){
-    $.post("/user/login",
-    {
-      name:"admin",
-      password:"admin"
-    }.,
-    function(data,status){
-      alert("数据：" + data + "\n状态：" + status);
-    });
-  });
-}); */
-
-
-function ajaxForm(){
-/* 	var formData = JSON.stringify({
-	      name:"admin",
-	      password:"admin"
-	    }); */
-	$.ajax({
-		type:"POST",
-		async:false,
-		data:$('#loginForm').serialize(),
-		data:formData,
-		headers: {
-			"content-Type":"application/json",
-			 },
-		dataType : 'text',
-		/* url:"${pageContext.request.contextPath}/user/login" */
-		url:"http://127.0.0.1:9003/user/login?backUrl="+getUrlParam("backUrl"),
-		success:function(data){
-			/* alert(); */
-			console.log("成功")
-		},
-		error:function(data){
-			alert(data);
-		}
-		
-	});
-}
-
-function getUrlParam(name) {  
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); // 构造一个含有目标参数的正则表达式对象  
-    var r = window.location.search.substr(1).match(reg);  // 匹配目标参数  
-    if (r != null) return unescape(r[2]); return "index"; // 返回参数值  
-}  
-
-</script>
+    用户名：<input type="text" name="username"/>
+    密码：<input type="password" name="password"/>
+    <button type="submit">提交</button>
+</form>
 </body>
 </html>
-

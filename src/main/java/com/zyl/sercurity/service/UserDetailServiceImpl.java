@@ -2,12 +2,16 @@ package com.zyl.sercurity.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.zyl.sercurity.pojo.User;
 
 
 /**
@@ -18,16 +22,24 @@ import org.springframework.stereotype.Service;
 @Service("userDetailService")
 public class UserDetailServiceImpl implements UserDetailsService {
     
+
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("username:" + username);
         
-        String password = "123456";
-        String authritizationStr = "MANAGER";
-        
+        User user = userService.getUser(username);
+        if(user == null) {
+            throw new UsernameNotFoundException("not found");
+        }
         //根据username查询数据库,获取账号密码
-        List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(authritizationStr);
+        List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole());
         
-        return new UserDetailsImpl(username,password,authorities);
+        return new UserDetailsImpl(username,user.getPassword(),authorities);
     }
 }

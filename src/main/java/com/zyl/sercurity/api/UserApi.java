@@ -1,7 +1,5 @@
 package com.zyl.sercurity.api;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.zyl.sercurity.utils.TokenDetailImpl;
 import com.zyl.sercurity.utils.TokenUtils;
@@ -37,32 +36,22 @@ public class UserApi {
         return "register succussful : " + username;
     }
 
-    @GetMapping("/")
-    public String index() {
-//        return "redirect:http://127.0.0.1:9001/index.html";
+//    @ResponseBody
+    @PostMapping("/user/token")
+    public String token(String username, String userpasswd,ModelAndView modelAndView) {
+        //验证账号密码
+        String token = tokenUtils.generateToken(new TokenDetailImpl(username));
+//        return token;
+        modelAndView.addObject("token", token);
         return "index";
     }
 
-    @GetMapping("/user/login")
-    public String login() {
-//        return "redirect:http://127.0.0.1:9001/login.html";
-        return "login";
-    }
-
-    @ResponseBody
-    @PostMapping("/user/token")
-    public String token(String username, String userpasswd) {
-        //验证账号密码
-        String token = tokenUtils.generateToken(new TokenDetailImpl(username));
-        return token;
-    }
-
-    @ResponseBody
-    @GetMapping("/user/info/{token}")
-    public String userinfo(@PathVariable String token) {
-        String username = tokenUtils.getUsernameFromToken(token);
-        return "hello:" + username;
-    }
+//    @ResponseBody
+//    @GetMapping("/user/info/{token}")
+//    public String userinfo(@PathVariable String token) {
+//        String username = tokenUtils.getUsernameFromToken(token);
+//        return "hello:" + username;
+//    }
     
     @ResponseBody
     @GetMapping("/user/token/refresh")
