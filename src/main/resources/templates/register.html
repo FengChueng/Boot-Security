@@ -2,11 +2,11 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <body>
 <h1 th:text="#{label.form.title}">form</h1>
-<form action="/register" th:object="${user}" method="POST" enctype="utf8">
+<form action="/user/register" th:object="${user}" method="POST" enctype="utf8">
     <div>
-        <label th:text="#{label.user.firstName}">first</label>
-        <input th:field="*{firstName}"/>
-        <p th:each="error: ${#fields.errors('firstName')}"
+        <label th:text="#{label.user.username}">first</label>
+        <input th:field="*{username}"/>
+        <p th:each="error: ${#fields.errors('username')}"
           th:text="${error}">Validation error</p>
     </div>
     <div>

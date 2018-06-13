@@ -28,3 +28,15 @@ token:
   header: token
   secret: secret
   expiration: 10800
+  
+  # JWT 604800  
+jwt: 
+  header: Authorization  
+  secret: mySecret  
+  expiration: 10  
+  tokenHead: Bearer  
+  route:
+    authentication:
+      path: auth/login  
+      refresh: auth/refresh  
+      register: auth/register

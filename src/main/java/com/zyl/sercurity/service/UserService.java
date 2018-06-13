@@ -28,7 +28,8 @@ public class UserService {
     }
 
     public User register(String username, String password) {
-        User user = userlist.put(username, new User(username, password, "ROLE_USER"));
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        User user = userlist.put(username, new User(username, encoder.encode(password), "ROLE_USER"));
         return user;
     }
     

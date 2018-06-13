@@ -16,7 +16,7 @@ import java.util.Iterator;
 /**
  * Created by liyd on 16/12/9.
  */
-@Service
+//@Service
 public class CustomAccessDecisionManager implements AccessDecisionManager {
 
     public void decide(Authentication authentication, Object object, Collection<ConfigAttribute> configAttributes) throws AccessDeniedException, InsufficientAuthenticationException {

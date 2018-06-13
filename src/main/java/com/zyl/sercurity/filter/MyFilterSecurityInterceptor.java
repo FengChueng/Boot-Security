@@ -19,11 +19,11 @@ import org.springframework.stereotype.Service;
 
 import com.zyl.sercurity.config.CustomAccessDecisionManager;
 
-@Service
+//@Service
 public class MyFilterSecurityInterceptor extends FilterSecurityInterceptor implements Filter {
 
-    @Autowired
-    private FilterInvocationSecurityMetadataSource securityMetadataSource;
+//    @Autowired
+//    private FilterInvocationSecurityMetadataSource securityMetadataSource;
 
     @Autowired
     public void setMyAccessDecisionManager(CustomAccessDecisionManager myAccessDecisionManager) {
@@ -64,8 +64,8 @@ public class MyFilterSecurityInterceptor extends FilterSecurityInterceptor imple
         return FilterInvocation.class;
     }
 
-    @Override
-    public SecurityMetadataSource obtainSecurityMetadataSource() {
-        return this.securityMetadataSource;
-    }
+//    @Override
+//    public SecurityMetadataSource obtainSecurityMetadataSource() {
+//        return this.securityMetadataSource;
+//    }
 }
