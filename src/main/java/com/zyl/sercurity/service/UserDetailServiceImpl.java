@@ -9,17 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import com.zyl.sercurity.pojo.User;
 
-
-/**
- * @author lengleng
- * @date 2017/10/26
- * <p>
- */
-@Service("userDetailService")
 public class UserDetailServiceImpl implements UserDetailsService {
     
 
@@ -40,6 +32,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         //根据username查询数据库,获取账号密码
         List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole());
         
-        return new UserDetailsImpl(username,user.getPassword(),authorities);
+        UserDetailsImpl userDetailsImpl = new UserDetailsImpl(username,user.getPassword(),authorities);
+        return userDetailsImpl;
     }
 }

@@ -12,9 +12,9 @@ spring:
     encoding: UTF-8
     content-type: text/html 
 
-security:
-  basic:
-    enabled: false #默认开启   false表示关闭权限校验 
+#security:
+#  basic:
+#    enabled: false #默认开启   false表示关闭权限校验 
 #  user:
 #    name: admin
 #    password: admin

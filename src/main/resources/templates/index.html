@@ -20,6 +20,8 @@
 		th:if="${cookie.getName().equals('token')}"
 		th:text="${cookie.getValue()}"> </span>
 
+	<a href="/admin">admin页面（非admin将会提示无权限）</a>
+
 	<h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
 	<form th:action="@{/logout}" method="post">
 		<input type="submit" value="注销" />
