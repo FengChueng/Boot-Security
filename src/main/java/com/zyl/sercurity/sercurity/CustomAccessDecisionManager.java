@@ -1,4 +1,4 @@
-package com.zyl.sercurity.config;
+package com.zyl.sercurity.sercurity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.AccessDecisionManager;

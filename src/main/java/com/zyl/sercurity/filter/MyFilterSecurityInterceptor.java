@@ -17,7 +17,7 @@ import org.springframework.security.web.access.intercept.FilterInvocationSecurit
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.stereotype.Service;
 
-import com.zyl.sercurity.config.CustomAccessDecisionManager;
+import com.zyl.sercurity.sercurity.CustomAccessDecisionManager;
 
 //@Service
 public class MyFilterSecurityInterceptor extends FilterSecurityInterceptor implements Filter {

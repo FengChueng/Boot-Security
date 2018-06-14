@@ -1,4 +1,4 @@
-package com.zyl.sercurity.config;
+package com.zyl.sercurity.sercurity;
 
 import java.util.Collection;
 import java.util.List;

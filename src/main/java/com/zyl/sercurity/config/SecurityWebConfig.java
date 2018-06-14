@@ -2,6 +2,8 @@ package com.zyl.sercurity.config;
 
 import java.util.Arrays;
 
+import javax.servlet.Filter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +26,10 @@ import org.springframework.security.web.access.intercept.DefaultFilterInvocation
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.zyl.sercurity.filter.MyFilterSecurityInterceptor;
+import com.zyl.sercurity.sercurity.MyAuthenctiationSuccessHandler;
 import com.zyl.sercurity.service.UserDetailServiceImpl;
 import com.zyl.sercurity.utils.TokenUtils;
 
@@ -40,9 +44,6 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         SessionRegistry sessionRegistry=new SessionRegistryImpl();
         return sessionRegistry;
     }
-    
-//    @Autowired
-//    private AccessDecisionManager accessDecisionManager;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -59,43 +60,11 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         return new UserDetailServiceImpl();
     }
     
-//    @Bean
-//    public FilterInvocationSecurityMetadataSource filterInvocationSecurityMetadataSource() {
-//        return new CustomSecurityMetadataSource();
-//    }
-    
-//    @Bean
-//    public AccessDecisionManager accessDecisionManager() {
-//        return new CustomAccessDecisionManager();
-//    }
     
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
         return new MyAuthenctiationSuccessHandler();
     }
-    
-//    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        return new CustomAnthencationProvider();
-//    }
-    
-
-//    @Bean
-//    public AuthenticationTokenFilter authenticationTokenFilter() throws Exception {
-//        AuthenticationTokenFilter authenticationTokenFilter = new AuthenticationTokenFilter();
-//        authenticationTokenFilter.setAuthenticationManager(authenticationManager());
-//        return authenticationTokenFilter;
-//    }
-    
-//      @Bean
-//      public FilterSecurityInterceptor filterSecurityInterceptor() throws Exception {
-//          FilterSecurityInterceptor authenticationTokenFilter = new MyFilterSecurityInterceptor();
-//          authenticationTokenFilter.setAuthenticationManager(authenticationManager());
-//          authenticationTokenFilter.setAccessDecisionManager(accessDecisionManager);
-//          authenticationTokenFilter.setSecurityMetadataSource(filterInvocationSecurityMetadataSource());
-//          return authenticationTokenFilter;
-//      }
-    
     
 
     @Override
@@ -125,21 +94,28 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         .rememberMeCookieName("workspace")
         .and()
         //以下这句就可以控制单个用户只能创建一个session，也就只能在服务器登录一次     
-        .httpBasic().disable().anonymous()
+//        .httpBasic().disable().anonymous()
         //使用JWT,不需要csrf
 //        .and().csrf().disable() // 关闭CSRF
 //        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//不需要session
-        
 //      .and()
 //      .sessionManagement().maximumSessions(1).expiredUrl("/login")//不需要session
 //      .sessionRegistry(getSessionRegistry())
 //      
         ;
         
-        
+     // 添加JWT filter  
+        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);  
+      // 禁用缓存  
+        http.headers().cacheControl();  
         
 
 //        http.addFilterBefore(authenticationTokenFilter(), FilterSecurityInterceptor.class);
+    }
+
+    public Filter authenticationTokenFilterBean() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
@@ -151,15 +127,5 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 //         auth.authenticationProvider(authenticationProvider());
     }
     
-    /**
-     * 添加多个provider
-     */
-//    @Override
-//    protected AuthenticationManager authenticationManager() throws Exception {
-//        ProviderManager authenticationManager = new ProviderManager(Arrays.asList(inMemoryAuthenticationProvider,authenticationProvider()));
-//        //不擦除认证密码，擦除会导致TokenBasedRememberMeServices因为找不到Credentials再调用UserDetailsService而抛出UsernameNotFoundException
-//        authenticationManager.setEraseCredentialsAfterAuthentication(false);
-//        return authenticationManager;
-//    }
     
 }

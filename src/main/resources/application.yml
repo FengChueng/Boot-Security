@@ -34,7 +34,7 @@ jwt:
   header: Authorization  
   secret: mySecret  
   expiration: 10  
-  tokenHead: Bearer  
+  tokenHead: token  
   route:
     authentication:
       path: auth/login  
