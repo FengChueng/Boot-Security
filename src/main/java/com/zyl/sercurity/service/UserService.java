@@ -9,17 +9,26 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.zyl.sercurity.pojo.User;
+import com.zyl.sercurity.utils.JwtTokenUtil;
+import com.zyl.sercurity.utils.TokenUtils;
 
 @Service
 public class UserService {
     
     @Autowired
     private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private UserDetailsService userDetailsService;
+    
+    @Autowired
+    private JwtTokenUtil tokenUtils;
     
     
     private static final Map<String, User> userlist = new HashMap<>();
@@ -44,26 +53,28 @@ public class UserService {
         return user;
     }
     
-//    public String login(String username, String password) {  
-//        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);  
-//        // Perform the security  
-//        final Authentication authentication = authenticationManager.authenticate(upToken);  
-//        SecurityContextHolder.getContext().setAuthentication(authentication);  
-//        // Reload password post-security so we can generate token  
-//        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);  
+    public String login(String username, String password) {  
+        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);  
+        // Perform the security  
+        final Authentication authentication = authenticationManager.authenticate(upToken);  
+        SecurityContextHolder.getContext().setAuthentication(authentication);  
+        // Reload password post-security so we can generate token  
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);  
 //        final String token = jwtTokenUtil.generateToken(userDetails);  
-//        return token;  
-//    }  
-//  
-//    public String refresh(String oldToken) {  
-//        final String token = oldToken.substring(tokenHead.length());  
-//        String username = jwtTokenUtil.getUsernameFromToken(token);  
-//        SysUser user = (SysUser) userDetailsService.loadUserByUsername(username);  
-//        if (jwtTokenUtil.canTokenBeRefreshed(token, user.getLastPasswordResetDate())){  
-//            return jwtTokenUtil.refreshToken(token);  
-//        }  
-//        return null;  
-//    }  
+        String token = tokenUtils.generateToken(userDetails);
+        return token;  
+    }  
+  
+    public String refreshToken(String oldToken) {  
+//        final String token = oldToken.substring("token ".length()); 
+        System.out.println("oldToken:" + oldToken);
+//        System.out.println("token:"+token);
+        String token = oldToken;
+//        if (!tokenUtils.isTokenExpired(token)) {
+            return tokenUtils.refreshToken(token);
+//        }
+//        return "error";
+    }  
     
     
 }

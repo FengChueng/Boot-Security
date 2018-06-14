@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
@@ -73,14 +75,11 @@ public class UserApi {
         return new ModelAndView("login", "user", accountDto);
     }
 
-    // @ResponseBody
-    @PostMapping("/user/token")
-    public String token(String username, String userpasswd) {
-        // 验证账号密码
-        String token = tokenUtils.generateToken(new TokenDetailImpl(username));
-        // return token;
-        // modelAndView.addObject("token", token);
-        return "index";
+    @ResponseBody
+    @PostMapping(value="/user/token")
+    public String token(@RequestBody User user) {
+       String token = userService.login(user.getUsername(), user.getPassword());
+        return token;
     }
 
     // @ResponseBody
@@ -93,7 +92,7 @@ public class UserApi {
     @ResponseBody
     @GetMapping("/user/token/refresh")
     public String refreshToken(@RequestParam String token) {
-        return "123";
+        return userService.refreshToken(token);
     }
     
     

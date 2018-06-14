@@ -18,7 +18,7 @@ public class ResourceMappingApi {
     }
 
     @GetMapping(value= {"/","/index"})
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public String index() {
 //        return "redirect:http://127.0.0.1:9001/index.html";
         return "index";

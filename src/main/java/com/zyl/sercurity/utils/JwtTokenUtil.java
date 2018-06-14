@@ -78,7 +78,7 @@ public class JwtTokenUtil implements Serializable {
         return new Date(System.currentTimeMillis() + expiration * 1000);
     }
 
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
@@ -115,7 +115,7 @@ public class JwtTokenUtil implements Serializable {
             claims.put(CLAIM_KEY_CREATED, new Date());
             refreshedToken = generateToken(claims);
         } catch (Exception e) {
-            refreshedToken = null;
+            refreshedToken = e.getMessage();
         }
         return refreshedToken;
     }

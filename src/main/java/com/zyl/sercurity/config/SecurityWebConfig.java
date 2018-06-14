@@ -1,34 +1,24 @@
 package com.zyl.sercurity.config;
 
-import java.util.Arrays;
-
 import javax.servlet.Filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDecisionManager;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.zyl.sercurity.filter.MyFilterSecurityInterceptor;
+import com.zyl.sercurity.filter.JwtAuthenticationTokenFilter;
 import com.zyl.sercurity.sercurity.MyAuthenctiationSuccessHandler;
 import com.zyl.sercurity.service.UserDetailServiceImpl;
 import com.zyl.sercurity.utils.TokenUtils;
@@ -37,7 +27,12 @@ import com.zyl.sercurity.utils.TokenUtils;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled=true)
 public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
-    
+    @Autowired
+    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    @Autowired
+    private EntryPointUnauthorizedHandler entryPointUnauthorizedHandler;
+    @Autowired
+    private RestAccessDeniedHandler restAccessDeniedHandler;
     
     @Bean
     public SessionRegistry getSessionRegistry(){
@@ -70,7 +65,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-        .antMatchers("/css/**", "/js/**", "/login","/register", "/user/register", "/user/token").permitAll()
+        .antMatchers("/css/**", "/js/**", "/login","/register", "/user/register", "/user/token","/user/token/refresh").permitAll()
 //        .antMatchers("/hello", "/user/info/", "/user/token/refresh").authenticated()
         .anyRequest().authenticated()
 //        .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {  
@@ -86,7 +81,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 //            }  
 //        })
         .and().formLogin().loginPage("/login")
-        .loginProcessingUrl("/user/token")
+//        .loginProcessingUrl("/user/token")
         .defaultSuccessUrl("/index").permitAll()
         .successHandler(authenticationSuccessHandler())
         .and().rememberMe().tokenValiditySeconds(604800)//记住我功能，cookies有限期是一周
@@ -105,17 +100,12 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         ;
         
      // 添加JWT filter  
-        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);  
+        http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);  
       // 禁用缓存  
         http.headers().cacheControl();  
         
-
+        http.exceptionHandling().authenticationEntryPoint(entryPointUnauthorizedHandler).accessDeniedHandler(restAccessDeniedHandler);
 //        http.addFilterBefore(authenticationTokenFilter(), FilterSecurityInterceptor.class);
-    }
-
-    public Filter authenticationTokenFilterBean() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override

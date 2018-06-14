@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import com.zyl.sercurity.pojo.User;
 import com.zyl.sercurity.service.UserService;
 
-@Component
+//@Component
 public class CustomAnthencationProvider implements AuthenticationProvider{
     @Autowired
     private UserService userService;
