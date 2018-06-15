@@ -18,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.zyl.sercurity.filter.JWTAuthenticationFilter;
+import com.zyl.sercurity.filter.JWTLoginFilter;
 import com.zyl.sercurity.filter.JwtAuthenticationTokenFilter;
 import com.zyl.sercurity.sercurity.MyAuthenctiationSuccessHandler;
 import com.zyl.sercurity.service.UserDetailServiceImpl;
@@ -61,6 +63,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
+        .antMatchers("/assets/", "/").permitAll()
 //        .antMatchers("/css/**", "/js/**", "/login.html","/register", "/user/register", "/user/token","/user/token/refresh").permitAll()
 //        .anyRequest().authenticated()
         .anyRequest().permitAll()
@@ -95,8 +98,12 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 //      
         ;
         
+        http.addFilter(new JWTLoginFilter(authenticationManager()))  
+        .addFilter(new JWTAuthenticationFilter(authenticationManager()));
+
+        
      // 添加JWT filter  
-        http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);  
+//        http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);  
       // 禁用缓存  
         http.headers().cacheControl();  
         
