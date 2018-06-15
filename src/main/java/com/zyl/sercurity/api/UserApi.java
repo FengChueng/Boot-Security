@@ -39,9 +39,6 @@ import com.zyl.sercurity.utils.TokenUtils;
 @Controller
 public class UserApi {
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    
-    @Autowired
     private UserService userService;
 
     @Autowired

@@ -29,10 +29,6 @@ import com.zyl.sercurity.utils.TokenUtils;
 public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
-    @Autowired
-    private EntryPointUnauthorizedHandler entryPointUnauthorizedHandler;
-    @Autowired
-    private RestAccessDeniedHandler restAccessDeniedHandler;
     
     @Bean
     public SessionRegistry getSessionRegistry(){
@@ -56,18 +52,18 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     }
     
     
-    @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new MyAuthenctiationSuccessHandler();
-    }
+//    @Bean
+//    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+//        return new MyAuthenctiationSuccessHandler();
+//    }
     
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-        .antMatchers("/css/**", "/js/**", "/login","/register", "/user/register", "/user/token","/user/token/refresh").permitAll()
-//        .antMatchers("/hello", "/user/info/", "/user/token/refresh").authenticated()
-        .anyRequest().authenticated()
+//        .antMatchers("/css/**", "/js/**", "/login.html","/register", "/user/register", "/user/token","/user/token/refresh").permitAll()
+//        .anyRequest().authenticated()
+        .anyRequest().permitAll()
 //        .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {  
 //            public <O extends FilterSecurityInterceptor> O postProcess(O fsi) {  
 //                fsi.setSecurityMetadataSource(filterInvocationSecurityMetadataSource());  
@@ -80,10 +76,10 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 //                return fsi;  
 //            }  
 //        })
-        .and().formLogin().loginPage("/login")
+//        .and().formLogin().loginPage("/login")
 //        .loginProcessingUrl("/user/token")
-        .defaultSuccessUrl("/index").permitAll()
-        .successHandler(authenticationSuccessHandler())
+//        .defaultSuccessUrl("/index").permitAll()
+//        .successHandler(authenticationSuccessHandler())
         .and().rememberMe().tokenValiditySeconds(604800)//记住我功能，cookies有限期是一周
         .rememberMeParameter("remember-me")//登陆时是否激活记住我功能的参数名字，在登陆页面有展示
         .rememberMeCookieName("workspace")
@@ -104,7 +100,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
       // 禁用缓存  
         http.headers().cacheControl();  
         
-        http.exceptionHandling().authenticationEntryPoint(entryPointUnauthorizedHandler).accessDeniedHandler(restAccessDeniedHandler);
+//        http.exceptionHandling().authenticationEntryPoint(entryPointUnauthorizedHandler).accessDeniedHandler(restAccessDeniedHandler);
 //        http.addFilterBefore(authenticationTokenFilter(), FilterSecurityInterceptor.class);
     }
 
@@ -113,8 +109,6 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService())
         .passwordEncoder(passwordEncoder())
         ;
-        // or
-//         auth.authenticationProvider(authenticationProvider());
     }
     
     
