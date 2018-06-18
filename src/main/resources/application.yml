@@ -4,23 +4,24 @@ server:
 spring:
   application:
     name: BootSecurity
+
 #  thymeleaf:
 #    cache: false # 请在线上环境打开cache
 #    prefix: classpath:/templates/
 #    mode: LEGACYHTML5  # HTML5
 #    encoding: UTF-8
 #    content-type: text/html 
-  mvc: 
-    view:
-      prefix: /
-      suffix: .html
-  resources:
-    static-locations:
-    - classpath:/static/ 
+#  mvc: 
+#    view:
+#      prefix: /
+#      suffix: .html
+#  resources:
+#    static-locations:
+#    - classpath:/static/ 
 
-#security:
-#  basic:
-#    enabled: false #默认开启   false表示关闭权限校验 
+security:
+  basic:
+    enabled: false #默认开启   false表示关闭权限校验 
 #  user:
 #    name: admin
 #    password: admin
@@ -39,8 +40,8 @@ token:
 jwt: 
   header: Authorization  
   secret: mySecret  
-  expiration: 10  
-  tokenHead: token  
+  expiration: 180
+  tokenHead: Bearer 
   route:
     authentication:
       path: auth/login  

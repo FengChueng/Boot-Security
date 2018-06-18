@@ -29,7 +29,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         
         User user = userService.getUser(username);
         if(user == null) {
-            throw new UsernameNotFoundException("not found");
+            throw new UsernameNotFoundException(username + "not register");
         }
         //根据username查询数据库,获取账号密码
         List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole());

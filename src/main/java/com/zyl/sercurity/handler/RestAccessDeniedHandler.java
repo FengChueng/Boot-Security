@@ -1,4 +1,5 @@
-package com.zyl.sercurity.config;
+package com.zyl.sercurity.handler;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,10 @@ import java.io.IOException;
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) {
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setStatus(403);
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) throws IOException {
+//        response.setHeader("Access-Control-Allow-Origin", "*");
+//        response.setStatus(403);
+        response.sendError(HttpStatus.FORBIDDEN.value(), "Unauthorized");
     }
 
 }
