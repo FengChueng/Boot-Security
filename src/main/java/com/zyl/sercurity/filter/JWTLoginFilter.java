@@ -2,7 +2,9 @@ package com.zyl.sercurity.filter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +18,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +32,7 @@ import com.zyl.sercurity.exception.InvalidTokenException;
 import com.zyl.sercurity.pojo.User;
 import com.zyl.sercurity.pojo.resp.ErrorCode;
 import com.zyl.sercurity.pojo.resp.ErrorResponse;
+import com.zyl.sercurity.service.UserDetailsImpl;
 import com.zyl.sercurity.utils.JwtTokenUtil;
 
 /**
@@ -39,16 +45,17 @@ import com.zyl.sercurity.utils.JwtTokenUtil;
 @Component
 public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
-    @Autowired
     private ObjectMapper mapper;
-
-    @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    private AuthenticationManager authenticationManager;
+    private UserDetailsService userDetailsService;
+//    private AuthenticationManager authenticationManager;
 
-    public JWTLoginFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+    public JWTLoginFilter(AuthenticationManager authenticationManager,UserDetailsService userDetailsService,ObjectMapper objectMapper,JwtTokenUtil jwtTokenUtil) {
+        setAuthenticationManager(authenticationManager);
+        this.userDetailsService = userDetailsService;
+        this.mapper = objectMapper;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     // 接收并解析用户凭证
@@ -56,10 +63,19 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException {
         try {
-            User user = new ObjectMapper().readValue(req.getInputStream(), User.class);
+            String parameter = req.getParameter("username");
+            User user = mapper.readValue(req.getInputStream(), User.class);
 
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+            
+            UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user.getUsername(),user.getPassword(),new ArrayList<>());
+            authentication.setDetails(userDetailsImpl);
+            
+//            authentication.setDetails(userDetailsService.loadUserByUsername(user.getUsername()));
+            
+            Authentication authenticate = this.getAuthenticationManager().authenticate(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
+            return authenticate;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -70,6 +86,14 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
             Authentication auth) throws IOException, ServletException {
         System.out.println("登录成功");
+        
+        String name = auth.getName();
+        Object credentials = auth.getCredentials();
+        Object principal = auth.getPrincipal();
+        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+        
+//        String token = jwtTokenUtil.generateToken(new UserDetailsImpl(name, null, null));
+//        res.addHeader("Authorization", "Bearer " + token);
         Object details = auth.getDetails();
         if (details instanceof UserDetails) {
             String token = jwtTokenUtil.generateToken((UserDetails) auth.getDetails());

@@ -1,5 +1,6 @@
 package com.zyl.sercurity.config;
 
+import org.mockito.internal.matchers.And;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +18,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.savedrequest.NullRequestCache;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zyl.sercurity.filter.JWTLoginFilter;
 import com.zyl.sercurity.service.UserDetailServiceImpl;
+import com.zyl.sercurity.utils.JwtTokenUtil;
 import com.zyl.sercurity.utils.TokenUtils;
 
 @Configuration
@@ -37,10 +43,19 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
     
+    
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
+    
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
+    
 
     
     
@@ -55,7 +70,8 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         .csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 //        .servletApi().rolePrefix("") //设置Role_Prefix  "_ROLE" -> ""
         .and()
-//        .formLogin().loginPage("/login").successHandler(successHandler)
+//        .formLogin().loginPage("/token")    //只能是 /login
+//        .and()
         .authorizeRequests()
         .antMatchers("/","/*.html","/favicon.ico","/**/*.html","/**/*.css","/**/*.js","/login","/user/register/**", "/user/register", "/user/token","/user/token/refresh").permitAll()
         .anyRequest().authenticated()
@@ -70,6 +86,10 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 //          .and()
 //      .logout()
 //          .permitAll();
+        http.addFilterBefore(new JWTLoginFilter(authenticationManager(),userDetailsService,objectMapper,jwtTokenUtil), UsernamePasswordAuthenticationFilter.class);
+//        http.requestCache().requestCache(new NullRequestCache());
+//      // 禁用缓存  
+//        http.headers().cacheControl();  
         }
 
 //    @Override
@@ -94,7 +114,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 //        .and()
 //        ;
 //        
-////        http.addFilter(new JWTLoginFilter(authenticationManager()))  
+//        http.addFilter(new JWTLoginFilter(authenticationManager()))  
 ////        .addFilter(new JWTAuthenticationFilter(authenticationManager()));
 //        
 //     // 添加JWT filter  

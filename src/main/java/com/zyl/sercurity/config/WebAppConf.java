@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Configuration
 public class WebAppConf extends WebMvcConfigurerAdapter {
     @Bean
@@ -45,6 +47,11 @@ public class WebAppConf extends WebMvcConfigurerAdapter {
                 .addProperty("hibernate.validator.fail_fast", "true").buildValidatorFactory();
         Validator validator = validatorFactory.getValidator();
         return validator;
+    }
+    
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
 }
