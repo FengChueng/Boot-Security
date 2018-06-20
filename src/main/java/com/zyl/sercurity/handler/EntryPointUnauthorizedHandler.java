@@ -23,6 +23,7 @@ public class EntryPointUnauthorizedHandler implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException {
 //        response.setHeader("Access-Control-Allow-Origin", "*");
 //        response.setStatus(401);
+        System.out.println(e.getMessage());
         if(e instanceof UsernameNotFoundException) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
         }else {

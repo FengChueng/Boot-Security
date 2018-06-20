@@ -1,12 +1,14 @@
 package com.zyl.sercurity.exception;
 
+import org.springframework.security.core.AuthenticationException;
+
 /**
  * 无效的Token
  *
  * @author Levin
  * @since 2017-05-25
  */
-public class InvalidTokenException extends RuntimeException {
+public class InvalidTokenException extends AuthenticationException {
 
     private static final long serialVersionUID = -294671188037098603L;
 

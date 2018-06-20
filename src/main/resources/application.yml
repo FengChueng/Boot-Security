@@ -40,7 +40,7 @@ token:
 jwt: 
   header: Authorization  
   secret: mySecret  
-  expiration: 180
+  expiration: 18000
   tokenHead: Bearer 
   route:
     authentication:

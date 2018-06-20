@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.zyl.sercurity.pojo.User;
+import com.zyl.sercurity.service.UserDetailsImpl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -121,7 +122,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        User user = (User) userDetails;
+        UserDetailsImpl user = (UserDetailsImpl) userDetails;
         final String username = getUsernameFromToken(token);
 //        final Date created = getCreatedDateFromToken(token);
 //        final Date expiration = getExpirationDateFromToken(token);

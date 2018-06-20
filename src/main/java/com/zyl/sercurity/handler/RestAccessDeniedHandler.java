@@ -19,6 +19,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) throws IOException {
+        System.out.println(e.getMessage());
 //        response.setHeader("Access-Control-Allow-Origin", "*");
 //        response.setStatus(403);
         response.sendError(HttpStatus.FORBIDDEN.value(), "Unauthorized");

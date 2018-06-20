@@ -2,15 +2,14 @@ package com.zyl.sercurity.filter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,11 +17,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +31,7 @@ import com.zyl.sercurity.exception.InvalidTokenException;
 import com.zyl.sercurity.pojo.User;
 import com.zyl.sercurity.pojo.resp.ErrorCode;
 import com.zyl.sercurity.pojo.resp.ErrorResponse;
+import com.zyl.sercurity.pojo.resp.TokenVO;
 import com.zyl.sercurity.service.UserDetailsImpl;
 import com.zyl.sercurity.utils.JwtTokenUtil;
 
@@ -43,17 +43,25 @@ import com.zyl.sercurity.utils.JwtTokenUtil;
  * @author zhaoxinguo on 2017/9/12.
  */
 @Component
-public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
+public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
+
+    @Value("${jwt.header}")
+    private String tokenHeader;
+
+    @Value("${jwt.expiration}")
+    private Long expiration;
 
     private ObjectMapper mapper;
     private JwtTokenUtil jwtTokenUtil;
 
-    private UserDetailsService userDetailsService;
-//    private AuthenticationManager authenticationManager;
+    public JWTLoginFilter() {
+        super(new AntPathRequestMatcher("/user/token", "POST"));//指定拦截的url和请求方式
+    }
 
-    public JWTLoginFilter(AuthenticationManager authenticationManager,UserDetailsService userDetailsService,ObjectMapper objectMapper,JwtTokenUtil jwtTokenUtil) {
+    @Autowired
+    public void init(AuthenticationManager authenticationManager, ObjectMapper objectMapper,
+            JwtTokenUtil jwtTokenUtil) {
         setAuthenticationManager(authenticationManager);
-        this.userDetailsService = userDetailsService;
         this.mapper = objectMapper;
         this.jwtTokenUtil = jwtTokenUtil;
     }
@@ -63,16 +71,12 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException {
         try {
-            String parameter = req.getParameter("username");
             User user = mapper.readValue(req.getInputStream(), User.class);
-
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
-            
-            UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user.getUsername(),user.getPassword(),new ArrayList<>());
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    user.getUsername(), user.getPassword());
+            UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user.getUsername(), user.getPassword(),
+                    new ArrayList<>());
             authentication.setDetails(userDetailsImpl);
-            
-//            authentication.setDetails(userDetailsService.loadUserByUsername(user.getUsername()));
-            
             Authentication authenticate = this.getAuthenticationManager().authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authenticate);
             return authenticate;
@@ -86,18 +90,11 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
             Authentication auth) throws IOException, ServletException {
         System.out.println("登录成功");
-        
-        String name = auth.getName();
-        Object credentials = auth.getCredentials();
-        Object principal = auth.getPrincipal();
-        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-        
-//        String token = jwtTokenUtil.generateToken(new UserDetailsImpl(name, null, null));
-//        res.addHeader("Authorization", "Bearer " + token);
         Object details = auth.getDetails();
         if (details instanceof UserDetails) {
             String token = jwtTokenUtil.generateToken((UserDetails) auth.getDetails());
-            res.addHeader("Authorization", "Bearer " + token);
+            mapper.writeValue(res.getWriter(), new TokenVO(token, expiration));
+
         } else {
             throw new InvalidTokenException("用户信息无效");
         }
@@ -109,24 +106,21 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException e) throws IOException, ServletException {
-        // super.unsuccessfulAuthentication(request, response, failed);
-
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        if (e instanceof BadCredentialsException) {
-            mapper.writeValue(response.getWriter(), ErrorResponse.of("Invalid username or password",
-                    ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+//         response.setStatus(HttpStatus.UNAUTHORIZED.value());
+         response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+        if (e instanceof BadCredentialsException || e instanceof UsernameNotFoundException) {
+            mapper.writeValue(response.getWriter(),
+                    ErrorResponse.of("用户名或密码错误", ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
         } else if (e instanceof ExpiredTokenException) {
             mapper.writeValue(response.getWriter(),
-                    ErrorResponse.of("Token has expired", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+                    ErrorResponse.of("Token过期,请重新登录", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
         } else if (e instanceof AuthMethodNotSupportedException) {
             mapper.writeValue(response.getWriter(),
                     ErrorResponse.of(e.getMessage(), ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+        }else {
+            mapper.writeValue(response.getWriter(),
+                    ErrorResponse.of("Authentication failed", ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
         }
-        mapper.writeValue(response.getWriter(),
-                ErrorResponse.of("Authentication failed", ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
-
     }
 
 }
