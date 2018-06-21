@@ -31,7 +31,7 @@ public class UserApi {
     private UserService userService;
 
     @ResponseBody
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @GetMapping("/hello")
     public String hello() {
         return "hello,boot-sercurity";

@@ -47,3 +47,16 @@ jwt:
       path: auth/login  
       refresh: auth/refresh  
       register: auth/register
+      
+# web端登录界面
+my: 
+  security: 
+    browser:  
+      login-page: /login.html
+      login-type: REDIRECT
+    code:
+      sms:
+        url: /hello               
+    
+      
+      

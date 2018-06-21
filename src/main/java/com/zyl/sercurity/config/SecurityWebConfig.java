@@ -14,14 +14,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zyl.sercurity.code.ValidateCodeFilter;
 import com.zyl.sercurity.filter.JWTLoginFilter;
 import com.zyl.sercurity.filter.JwtAuthenticationTokenFilter;
 import com.zyl.sercurity.handler.EntryPointUnauthorizedHandler;
 import com.zyl.sercurity.handler.RestAccessDeniedHandler;
-import com.zyl.sercurity.utils.JwtTokenUtil;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +34,9 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    
+    @Autowired
+    private ValidateCodeFilter validateCodeFilter;
     
 //    @Autowired
 //    private AuthenticationEntryPoint authenticationEntryPoint;
@@ -69,17 +73,22 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         http
         .csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 //        .servletApi().rolePrefix("") //设置Role_Prefix  "_ROLE" -> ""
+//        .and()
+//        .formLogin().loginPage("/authentication/require")
         .and()
         .authorizeRequests()
         .antMatchers("/","/*.html","/favicon.ico","/**/*.html","/**/*.css","/**/*.js","/login","/user/register/**", "/user/register", "/user/token","/user/token/refresh").permitAll()
+        .antMatchers("/authentication/require", "/code/image","/code/sms").permitAll()
         .anyRequest().authenticated()
         .and()
 //        .exceptionHandling().authenticationEntryPoint(this.authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler);
         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).accessDeniedHandler(accessDeniedHandler());
         http.addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(jwtAuthenticationTokenFilter,UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(jwtAuthenticationTokenFilter,UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationTokenFilter,FilterSecurityInterceptor.class);
         
         
+        http.addFilterBefore(validateCodeFilter, AbstractPreAuthenticatedProcessingFilter.class);
 //        http.requestCache().requestCache(new NullRequestCache());
 //      // 禁用缓存  
 //        http.headers().cacheControl();

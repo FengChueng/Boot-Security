@@ -34,6 +34,8 @@ import com.zyl.sercurity.utils.JwtTokenUtil;
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
+    private static final String FILTER_APPLIED = "__spring_security_jwtAuthenticationTokenFilter_filterApplied";
+
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -44,14 +46,18 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     private String tokenHead;
 
     @Autowired
-    private ObjectMapper mapper;
-    
-    @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        if (request.getAttribute(FILTER_APPLIED) != null) {
+            chain.doFilter(request, response);
+            return ;
+        }
+        
+        
+        
         String token = request.getHeader(this.tokenHeader);
         if (token == null) {
             token = request.getParameter("token");
@@ -70,11 +76,13 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }else if(username == null) {
-            response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-            mapper.writeValue(response.getWriter(),
-                    ErrorResponse.of("无效的Token,请重新登录", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
-            return;
+//            response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+//            mapper.writeValue(response.getWriter(),
+//                    ErrorResponse.of("无效的Token,请重新登录", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+//            return;
+            throw new InvalidTokenException("无效的Token,请重新登录");
         }
+        request.setAttribute(FILTER_APPLIED,true);
         chain.doFilter(request, response);
     }
 }

@@ -1,4 +1,6 @@
 package com.zyl.sercurity.utils;
+import static org.hamcrest.CoreMatchers.nullValue;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +35,9 @@ public class JwtTokenUtil implements Serializable {
         String username;
         try {
             final Claims claims = getClaimsFromToken(token);
+            if(claims == null) {
+                return null;
+            }
             username = claims.getSubject();
         } catch (Exception e) {
             username = null;
