@@ -1,8 +1,13 @@
 package com.zyl.sercurity.config;
 
+import javax.annotation.Resource;
+import javax.servlet.Filter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
@@ -23,6 +30,8 @@ import com.zyl.sercurity.filter.JWTLoginFilter;
 import com.zyl.sercurity.filter.JwtAuthenticationTokenFilter;
 import com.zyl.sercurity.handler.EntryPointUnauthorizedHandler;
 import com.zyl.sercurity.handler.RestAccessDeniedHandler;
+import com.zyl.sercurity.sms.SmsCodeAuthenticationFilter;
+import com.zyl.sercurity.sms.SmsCodeAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -44,8 +53,27 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 ////    @Autowired
 //    private AccessDeniedHandler accessDeniedHandler;
     
-    @Autowired
+    @Resource(name="userDetailServiceImpl")
     private UserDetailsService userDetailsService;
+    
+    @Resource(name="smsUserDetailServiceImpl")
+    private UserDetailsService smsUserDetailsService;
+    
+    
+    @Autowired
+    private AuthenticationSuccessHandler myAuthenticationSuccessHandler;
+
+    @Autowired
+    private AuthenticationFailureHandler myAuthenticationFailureHandler;
+    
+    @Bean
+    public Filter filter() throws Exception {
+        SmsCodeAuthenticationFilter smsCodeAuthenticationFilter = new SmsCodeAuthenticationFilter();
+        smsCodeAuthenticationFilter.setAuthenticationManager(authenticationManager());
+        smsCodeAuthenticationFilter.setAuthenticationSuccessHandler(myAuthenticationSuccessHandler);
+        smsCodeAuthenticationFilter.setAuthenticationFailureHandler(myAuthenticationFailureHandler);
+        return smsCodeAuthenticationFilter;
+    }
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,22 +101,25 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         http
         .csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 //        .servletApi().rolePrefix("") //设置Role_Prefix  "_ROLE" -> ""
-//        .and()
-//        .formLogin().loginPage("/authentication/require")
+        .and()
+        .formLogin().loginPage("/authentication/require")
         .and()
         .authorizeRequests()
-        .antMatchers("/","/*.html","/favicon.ico","/**/*.html","/**/*.css","/**/*.js","/login","/user/register/**", "/user/register", "/user/token","/user/token/refresh").permitAll()
+//        .antMatchers("/","/*.html","/favicon.ico","/**/*.html","/**/*.css","/**/*.js","/login","/user/register/**", "/user/register", "/user/token","/user/token/refresh").permitAll()
+        .antMatchers("/*.html","/favicon.ico","/**/*.html","/**/*.css","/**/*.js","/login","/user/register/**", "/user/register", "/user/token","/user/token/refresh").permitAll()
         .antMatchers("/authentication/require", "/code/image","/code/sms").permitAll()
         .anyRequest().authenticated()
         .and()
-//        .exceptionHandling().authenticationEntryPoint(this.authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler);
         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).accessDeniedHandler(accessDeniedHandler());
+        
         http.addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class);
 //        http.addFilterBefore(jwtAuthenticationTokenFilter,UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationTokenFilter,FilterSecurityInterceptor.class);
         
         
         http.addFilterBefore(validateCodeFilter, AbstractPreAuthenticatedProcessingFilter.class);
+        
+        http.addFilterBefore(filter(),UsernamePasswordAuthenticationFilter.class);
 //        http.requestCache().requestCache(new NullRequestCache());
 //      // 禁用缓存  
 //        http.headers().cacheControl();
@@ -99,11 +130,20 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 //    .rememberMeCookieName("workspace")
         }
 
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        SmsCodeAuthenticationProvider smsCodeAuthenticationProvider = new SmsCodeAuthenticationProvider();
+        smsCodeAuthenticationProvider.setUserDetailsService(smsUserDetailsService);
+        return smsCodeAuthenticationProvider;
+    }
+    
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        
+        auth.authenticationProvider(authenticationProvider());
+        
         auth.userDetailsService(userDetailsService)
-        .passwordEncoder(passwordEncoder())
-        ;
+        .passwordEncoder(passwordEncoder());
     }
     
     

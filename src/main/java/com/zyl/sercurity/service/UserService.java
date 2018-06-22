@@ -3,6 +3,8 @@ package com.zyl.sercurity.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +22,7 @@ public class UserService {
 //    @Autowired
 //    private AuthenticationManager authenticationManager;
     
-    @Autowired
+    @Resource(name="userDetailServiceImpl")
     private UserDetailsService userDetailsService;
     
     @Autowired
@@ -37,6 +39,12 @@ public class UserService {
         userlist.put(user1.getUsername(), user1);
         
     }
+    
+    public User getUserByMobiePhone(String userName) {
+        User user = userlist.get(userName);
+        return user;
+    }
+    
     
     public User getUser(String userName) {
         User user = userlist.get(userName);

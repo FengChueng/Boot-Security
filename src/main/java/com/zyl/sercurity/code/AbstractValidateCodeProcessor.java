@@ -110,7 +110,9 @@ public abstract class AbstractValidateCodeProcessor<C extends ValidateCode> impl
         ValidateCodeType processorType = getValidateCodeType(request);
         String sessionKey = getSessionKey(request);
 
-        C codeInSession = (C) sessionStrategy.getAttribute(request, sessionKey);
+        Object attribute = sessionStrategy.getAttribute(request, sessionKey);
+        System.out.println("attribute:"+attribute);
+        C codeInSession = (C) attribute;
 
         String codeInRequest;
         try {

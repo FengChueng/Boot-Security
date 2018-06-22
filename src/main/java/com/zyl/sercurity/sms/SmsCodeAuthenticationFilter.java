@@ -37,7 +37,7 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
             throws AuthenticationException {
         // 请求方式校验
         if (postOnly && !request.getMethod().equals("POST")) {
-            throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
+            throw new AuthenticationServiceException("不支持该请求方式: " + request.getMethod());
         }
 
         // 获取请求中的参数值

@@ -34,8 +34,8 @@ public class EntryPointUnauthorizedHandler implements AuthenticationEntryPoint {
       response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 //        response.setHeader("Access-Control-Allow-Origin", "*");
 //        response.setStatus(401);
-        System.out.println(e.getMessage());
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
+        System.out.println("EntryPointUnauthorizedHandler:"+e.getMessage());
+        response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
         if(e instanceof InvalidTokenException){
             mapper.writeValue(response.getWriter(),
                     ErrorResponse.of("Token失效,请重新登录", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));

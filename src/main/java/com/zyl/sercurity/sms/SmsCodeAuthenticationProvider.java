@@ -1,11 +1,12 @@
 package com.zyl.sercurity.sms;
 
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
  * @Author: HanLong
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 public class SmsCodeAuthenticationProvider implements AuthenticationProvider {
 
+    private static final String String = null;
     private UserDetailsService userDetailsService;
 
     /**
@@ -30,12 +32,11 @@ public class SmsCodeAuthenticationProvider implements AuthenticationProvider {
         /**
          * 调用 {@link UserDetailsService}
          */
-        UserDetails user = userDetailsService.loadUserByUsername((String) authenticationToken.getPrincipal());
-
+        String principal = (java.lang.String) authenticationToken.getPrincipal();
+        UserDetails user = userDetailsService.loadUserByUsername(principal);
         if (user == null) {
-            throw new InternalAuthenticationServiceException("无法获取用户信息");
+            throw new UsernameNotFoundException("无法获取用户信息");
         }
-
         SmsCodeAuthenticationToken authenticationResult = new SmsCodeAuthenticationToken(user, user.getAuthorities());
 
         authenticationResult.setDetails(authenticationToken.getDetails());

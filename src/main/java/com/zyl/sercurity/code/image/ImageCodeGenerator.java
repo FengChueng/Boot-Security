@@ -14,7 +14,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import com.zyl.sercurity.code.ValidateCodeGenerator;
 import com.zyl.sercurity.properties.SecurityProperties;
 
-@Component
+@Component("imageValidateCodeGenerator")
 public class ImageCodeGenerator implements ValidateCodeGenerator {
 
     private static final String IMAGE_WIDTH_NAME = "width";

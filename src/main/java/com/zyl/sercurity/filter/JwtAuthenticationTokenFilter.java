@@ -3,6 +3,7 @@ package com.zyl.sercurity.filter;
 
 import java.io.IOException;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +37,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private static final String FILTER_APPLIED = "__spring_security_jwtAuthenticationTokenFilter_filterApplied";
 
-    @Autowired
+    @Resource(name="userDetailServiceImpl")
     private UserDetailsService userDetailsService;
 
     @Value("${jwt.header}")
