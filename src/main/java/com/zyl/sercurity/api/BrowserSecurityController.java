@@ -15,6 +15,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,6 +65,11 @@ public class BrowserSecurityController {
 
         return ErrorResponse.of("访问的服务需要身份认证，请引导用户到登录页",ErrorCode.AUTHENTICATION,HttpStatus.UNAUTHORIZED);
     }
+    
+//    @GetMapping("/error")
+//    public ErrorResponse errorMapping(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//        return ErrorResponse.of("请重新访问",ErrorCode.AUTHENTICATION,HttpStatus.UNAUTHORIZED);
+//    }
 
 
 //    @GetMapping("/session/invalid")

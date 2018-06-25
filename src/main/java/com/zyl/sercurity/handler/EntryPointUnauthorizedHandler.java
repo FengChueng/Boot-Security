@@ -11,6 +11,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,26 +31,47 @@ import com.zyl.sercurity.pojo.resp.ErrorResponse;
 public class EntryPointUnauthorizedHandler implements AuthenticationEntryPoint {
     @Autowired
     private ObjectMapper mapper;
+    
+ // 用于重定向
+    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException {
-      response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 //        response.setHeader("Access-Control-Allow-Origin", "*");
 //        response.setStatus(401);
         System.out.println("EntryPointUnauthorizedHandler:"+e.getMessage());
-        response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
-        if(e instanceof InvalidTokenException){
-            mapper.writeValue(response.getWriter(),
-                    ErrorResponse.of("Token失效,请重新登录", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
-//            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized");
-        } else if(e instanceof ValidateCodeException){
-            mapper.writeValue(response.getWriter(),
-                    ErrorResponse.of(e.getMessage(), ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
-//            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized");
-        } else {
-            mapper.writeValue(response.getWriter(),
-                    ErrorResponse.of("身份验证失败", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
-//            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized");
+//        response.sendError(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
+//        if(e instanceof InvalidTokenException){
+//      response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+//            mapper.writeValue(response.getWriter(),
+//                    ErrorResponse.of("Token失效,请重新登录", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+////            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized");
+//        } else if(e instanceof ValidateCodeException){
+//      response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+//            mapper.writeValue(response.getWriter(),
+//                    ErrorResponse.of(e.getMessage(), ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+////            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized");
+//        } else {
+//      response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+//            mapper.writeValue(response.getWriter(),
+//                    ErrorResponse.of("身份验证失败", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+////            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized");
+//        }
+        
+        if(isAjaxRequest(request)){//如果是ajax请求
+            response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,e.getMessage());
+        }else{
+            response.sendRedirect("/login.html");
+//            redirectStrategy.sendRedirect(request, response, "/login.html");
         }
+
+    }
+
+    
+    public static boolean isAjaxRequest(HttpServletRequest request) {
+        String ajaxFlag = request.getHeader("X-Requested-With");
+        return ajaxFlag != null && "XMLHttpRequest".equals(ajaxFlag);
     }
 
 }

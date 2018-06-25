@@ -99,6 +99,8 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+        .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).accessDeniedHandler(accessDeniedHandler())
+        .and()
         .csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 //        .servletApi().rolePrefix("") //设置Role_Prefix  "_ROLE" -> ""
         .and()
@@ -109,8 +111,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/*.html","/favicon.ico","/**/*.html","/**/*.css","/**/*.js","/login","/user/register/**", "/user/register", "/user/token","/user/token/refresh").permitAll()
         .antMatchers("/authentication/require", "/code/image","/code/sms").permitAll()
         .anyRequest().authenticated()
-        .and()
-        .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).accessDeniedHandler(accessDeniedHandler());
+        ;
         
         http.addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class);
 //        http.addFilterBefore(jwtAuthenticationTokenFilter,UsernamePasswordAuthenticationFilter.class);
@@ -140,7 +141,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         
-        auth.authenticationProvider(authenticationProvider());
+//        auth.authenticationProvider(authenticationProvider());
         
         auth.userDetailsService(userDetailsService)
         .passwordEncoder(passwordEncoder());
